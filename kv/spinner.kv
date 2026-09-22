@@ -1,0 +1,55 @@
+#:import Animation kivy.animation.Animation
+#:import Rotate kivy.graphics.Rotate
+#:import PushMatrix kivy.graphics.PushMatrix
+#:import PopMatrix kivy.graphics.PopMatrix
+
+# Custom rotating widget used for the spin animation
+<SpinnerWidget>:
+    angle: 0
+    canvas.before:
+        PushMatrix
+        Rotate:
+            angle: self.angle
+            origin: self.center
+    canvas.after:
+        PopMatrix
+
+# Home screen: spin button + result display + spinner overlay
+<HomeScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(15)
+
+        Label:
+            id: recipe_label
+            text: root.current_recipe if root.current_recipe else "Tap below to decide!"
+            font_size: "20sp"
+            text_size: self.width, None
+            halign: "center"
+            valign: "middle"
+            size_hint_y: 0.4
+
+        SpinnerWidget:
+            id: spinner
+            size_hint: None, None
+            size: dp(80), dp(80)
+            pos_hint: {"center_x": 0.5}
+            opacity: 0
+
+        Button:
+            text: "What's for Dinner?"
+            font_size: "22sp"
+            size_hint_y: 0.2
+            disabled: root.is_spinning
+            on_release: root.spin()
+
+        BoxLayout:
+            size_hint_y: 0.15
+            spacing: dp(10)
+            Button:
+                text: "My Recipes"
+                on_release: app.root.current = "recipe"
+            Button:
+                text: "Settings"
+                on_release: app.root.current = "settings"
