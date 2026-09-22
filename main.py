@@ -1,8 +1,8 @@
 """
 What's for Dinner - Application entry point.
 
-Bootstraps Kivy, registers resource paths, loads KV files,
-and builds the ScreenManager.
+Imports screens from src/, registers resource paths,
+loads KV files, builds the ScreenManager.
 """
 
 import os
@@ -12,9 +12,13 @@ from kivy.lang import Builder
 from kivy.resources import resource_add_path
 from kivy.uix.screenmanager import ScreenManager
 
-from src.screens.home_screen import HomeScreen
-from src.screens.recipe_screen import RecipeScreen
-from src.screens.settings_screen import SettingsScreen
+# Import screens and widgets so Kivy's Factory knows about them
+# BEFORE the KV file is loaded. The noqa comments silence "unused import"
+# warnings from linters -- these imports register classes as a side effect.
+from src.screens.home_screen import HomeScreen  # noqa: F401
+from src.screens.recipe_screen import RecipeScreen  # noqa: F401
+from src.screens.settings_screen import SettingsScreen  # noqa: F401
+from src.widgets.spinner_widget import SpinnerWidget  # noqa: F401
 
 
 class WhatsForDinnerApp(App):
@@ -27,7 +31,7 @@ class WhatsForDinnerApp(App):
         resource_add_path(os.path.join(base_dir, "kv"))
         resource_add_path(os.path.join(base_dir, "assets"))
 
-        # Load KV files by bare filename (resolved via resource paths)
+        # Load KV by bare filename (resolved via resource paths)
         Builder.load_file("spinner.kv")
 
         sm = ScreenManager()
