@@ -1,46 +1,34 @@
 """
-What's for Dinner - Main application entry point.
+What's for Dinner - Application entry point.
 
-This module bootstraps the Kivy application, loads KV definitions,
-and wires the screen manager.
+Bootstraps Kivy, registers resource paths, loads KV files,
+and builds the ScreenManager.
 """
+
+import os
 
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.properties import StringProperty, BooleanProperty
+from kivy.resources import resource_add_path
+from kivy.uix.screenmanager import ScreenManager
 
-
-class HomeScreen(Screen):
-    """
-    Main screen: user taps spin, animation plays, recipe appears.
-    """
-    current_recipe = StringProperty("")
-    is_spinning = BooleanProperty(False)
-
-
-class RecipeScreen(Screen):
-    """
-    Displays full recipe details (ingredients, steps).
-    """
-    pass
-
-
-class SettingsScreen(Screen):
-    """
-    Settings + upgrade to paid tier.
-    """
-    pass
+from src.screens.home_screen import HomeScreen
+from src.screens.recipe_screen import RecipeScreen
+from src.screens.settings_screen import SettingsScreen
 
 
 class WhatsForDinnerApp(App):
-    """
-    Root application class. Builds the ScreenManager.
-    """
+    """Root application class."""
 
     def build(self):
-        # Load KV files from assets/animations/
-        Builder.load_file("assets/animations/spinner.kv")
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+
+        # Register resource folders so Kivy finds them on Android too
+        resource_add_path(os.path.join(base_dir, "kv"))
+        resource_add_path(os.path.join(base_dir, "assets"))
+
+        # Load KV files by bare filename (resolved via resource paths)
+        Builder.load_file("spinner.kv")
 
         sm = ScreenManager()
         sm.add_widget(HomeScreen(name="home"))
