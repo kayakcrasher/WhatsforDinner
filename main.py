@@ -47,7 +47,7 @@ def is_premium(recipe):
 
 
 def filter_recipes(recipes, vegetarian=False, no_peanuts=False, tier="free",
-                   meal_type=None, protein=None):
+                   meal_type=None, protein=None, category=None):
     """Apply all filters."""
     out = recipes
     if vegetarian:
@@ -60,6 +60,8 @@ def filter_recipes(recipes, vegetarian=False, no_peanuts=False, tier="free",
         out = [r for r in out if r.get("meal_type") == meal_type]
     if protein and protein != "any":
         out = [r for r in out if r.get("protein") == protein]
+    if category and category != "all":
+        out = [r for r in out if (r.get("category") or "").lower() == category.lower()]
     return out
 
 
@@ -72,8 +74,9 @@ def index():
 
 @app.get("/api/recipes")
 def list_recipes(vegetarian: bool = False, no_peanuts: bool = False, tier: str = "free",
-                 meal_type: str | None = None, protein: str | None = None):
-    filtered = filter_recipes(RECIPES, vegetarian, no_peanuts, tier, meal_type, protein)
+                 meal_type: str | None = None, protein: str | None = None,
+                 category: str | None = None):
+    filtered = filter_recipes(RECIPES, vegetarian, no_peanuts, tier, meal_type, protein, category)
     return {
         "count": len(filtered),
         "total": len(RECIPES),
@@ -84,11 +87,34 @@ def list_recipes(vegetarian: bool = False, no_peanuts: bool = False, tier: str =
 
 @app.get("/api/spin")
 def spin(vegetarian: bool = False, no_peanuts: bool = False, tier: str = "free",
-         meal_type: str | None = None, protein: str | None = None):
-    filtered = filter_recipes(RECIPES, vegetarian, no_peanuts, tier, meal_type, protein)
+         meal_type: str | None = None, protein: str | None = None,
+         category: str | None = None):
+    filtered = filter_recipes(RECIPES, vegetarian, no_peanuts, tier, meal_type, protein, category)
     if not filtered:
         raise HTTPException(404, "No recipes match your filters")
     return random.choice(filtered)
+
+
+@app.get("/api/categories")
+def categories(tier: str = "free"):
+    """Return list of cuisines with counts, respecting tier."""
+    pool = RECIPES if tier == "paid" else [r for r in RECIPES if not is_premium(r)]
+    counts = {}
+    for r in pool:
+        cat = r.get("category") or "Other"
+        counts[cat] = counts.get(cat, 0) + 1
+    return sorted(
+        [{"name": k, "count": v} for k, v in counts.items()],
+        key=lambda x: -x["count"],
+    )
+
+
+@app.get("/api/recipe/{recipe_id}")
+def get_recipe(recipe_id: int):
+    for r in RECIPES:
+        if r["id"] == recipe_id:
+            return r
+    raise HTTPException(404, "Recipe not found")
 
 
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
