@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>What's for Dinner?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#FAF4F0; --surface:#FFF; --surface-alt:#F5EDE6;
+    --primary:#E1A1A8; --primary-dark:#C7828C; --primary-light:#F2D1D4;
+    --sage:#A3B59E; --sage-dark:#85997F;
+    --text:#332929; --text-muted:#7A6B6B; --text-light:#AD9E9E;
+    --terracotta:#CC7859; --gold:#D9AD5C;
+    --shadow-sm:0 2px 8px rgba(51,41,41,.06);
+    --shadow-md:0 4px 16px rgba(51,41,41,.08);
+    --radius-md:20px; --radius-lg:28px; --radius-pill:100px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;user-select:none}
+  #app{height:100%;display:flex;flex-direction:column;padding:24px 20px 16px;max-width:480px;margin:0 auto;overflow-y:auto}
+  header{text-align:center;margin-bottom:14px;flex-shrink:0}
+  header h1{font-size:26px;font-weight:800;letter-spacing:-.5px}
+  header p{font-size:14px;color:var(--text-muted);margin-top:2px;font-weight:500}
+
+  .filter-block{margin-bottom:10px;flex-shrink:0}
+  .filter-label{font-size:11px;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;padding-left:2px}
+  .chip-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .chip-row::-webkit-scrollbar{display:none}
+  .chip{background:var(--surface);border:2px solid transparent;color:var(--text-muted);font-family:inherit;font-size:13px;font-weight:700;padding:7px 14px;border-radius:var(--radius-pill);cursor:pointer;box-shadow:var(--shadow-sm);transition:all .15s ease;flex-shrink:0;white-space:nowrap}
+  .chip:active{transform:scale(.96)}
+  .chip.active{background:var(--primary);color:#fff;border-color:var(--primary-dark)}
+  .chip.active.sage{background:var(--sage);border-color:var(--sage-dark)}
+  .chip.active.terracotta{background:var(--terracotta);border-color:#a85c40}
+  .chip.active.gold{background:var(--gold);border-color:#b8904a}
+
+  .recipe-card{background:var(--surface);border-radius:var(--radius-lg);padding:28px 22px;box-shadow:var(--shadow-md);min-height:150px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;transition:transform .3s ease;margin-bottom:16px;flex-shrink:0}
+  .recipe-card.spinning{transform:scale(.98)}
+  .recipe-empty{font-size:19px;font-weight:600;color:var(--text-light);line-height:1.4}
+  .recipe-result{animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
+  .recipe-name{font-size:24px;font-weight:800;line-height:1.2;margin-bottom:10px;letter-spacing:-.5px}
+  .recipe-meta{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
+  .recipe-meta span{background:var(--surface-alt);color:var(--text-muted);font-size:12px;font-weight:600;padding:3px 10px;border-radius:var(--radius-pill)}
+  .recipe-details-btn{background:var(--primary-light);color:var(--primary-dark);border:none;font-family:inherit;font-size:13px;font-weight:700;padding:7px 18px;border-radius:var(--radius-pill);cursor:pointer}
+  @keyframes pop{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}
+
+  .spinner-area{height:140px;display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0}
+  .plate{width:120px;height:120px;border-radius:50%;background:#fff;box-shadow:var(--shadow-md);position:absolute;opacity:0;transition:opacity .3s ease}
+  .plate.active{opacity:1;animation:spin 1s linear infinite}
+  .plate::before{content:'';position:absolute;top:15%;left:15%;width:70%;height:70%;border-radius:50%;background:var(--primary)}
+  .plate::after{content:'';position:absolute;top:40%;left:40%;width:20%;height:20%;border-radius:50%;background:var(--terracotta)}
+  .plate .garnish{position:absolute;border-radius:50%}
+  .plate .g1{width:14%;height:14%;background:var(--sage);top:55%;left:28%}
+  .plate .g2{width:12%;height:12%;background:var(--gold);top:30%;left:60%}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+  .btn-primary{background:var(--primary);color:#fff;border:none;font-family:inherit;font-size:19px;font-weight:800;padding:16px;border-radius:var(--radius-pill);cursor:pointer;box-shadow:var(--shadow-md);transition:all .15s ease;margin-bottom:12px;letter-spacing:-.3px;flex-shrink:0}
+  .btn-primary:active:not(:disabled){background:var(--primary-dark);transform:scale(.98)}
+  .btn-primary:disabled{opacity:.7;cursor:not-allowed}
+  .nav-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0}
+  .btn-secondary{background:var(--sage);color:#fff;border:none;font-family:inherit;font-size:14px;font-weight:700;padding:12px;border-radius:var(--radius-md);cursor:pointer;box-shadow:var(--shadow-sm);transition:all .15s ease}
+  .btn-secondary.alt{background:var(--surface-alt);color:var(--text)}
+  .btn-secondary:active{transform:scale(.98)}
+
+  .footer-attr{text-align:center;font-size:10px;color:var(--text-light);margin-top:12px;line-height:1.4;flex-shrink:0}
+  .footer-attr a{color:var(--text-muted);text-decoration:underline}
+
+  .modal{display:none;position:fixed;inset:0;background:rgba(51,41,41,.5);z-index:100;align-items:flex-end;justify-content:center;animation:fadeIn .2s ease}
+  .modal.active{display:flex}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .modal-content{background:var(--surface);border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:28px 22px 36px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;animation:slideUp .3s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .modal-content h2{font-size:22px;font-weight:800;margin-bottom:8px;letter-spacing:-.5px}
+  .meta-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+  .meta-row span{background:var(--surface-alt);color:var(--text-muted);font-size:12px;font-weight:600;padding:3px 10px;border-radius:var(--radius-pill)}
+  .modal-content h3{font-size:14px;font-weight:800;color:var(--primary-dark);margin:18px 0 8px;text-transform:uppercase;letter-spacing:.5px}
+  .modal-content ul,.modal-content ol{padding-left:20px;font-size:15px;line-height:1.7}
+  .modal-content li{margin-bottom:5px}
+  .modal-close{background:var(--surface-alt);color:var(--text);border:none;font-family:inherit;font-size:15px;font-weight:700;padding:13px;border-radius:var(--radius-md);cursor:pointer;width:100%;margin-top:22px}
+  .premium-badge{display:inline-block;background:var(--gold);color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:var(--radius-pill);margin-left:6px;letter-spacing:.5px;vertical-align:middle}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header>
+    <h1>What's for Dinner?</h1>
+    <p>Let us decide for you</p>
+  </header>
+
+  <div class="filter-block">
+    <div class="filter-label">Meal</div>
+    <div class="chip-row" id="mealRow"></div>
+  </div>
+
+  <div class="filter-block">
+    <div class="filter-label">Protein</div>
+    <div class="chip-row" id="proteinRow"></div>
+  </div>
+
+  <div class="filter-block">
+    <div class="filter-label">Diet</div>
+    <div class="chip-row" id="dietRow">
+      <button class="chip terracotta" id="nutBtn"><span>&#128683;</span> No Peanuts</button>
+      <button class="chip gold" id="premBtn"><span>&#128081;</span> Premium (dev)</button>
+    </div>
+  </div>
+
+  <div class="recipe-card" id="recipeCard">
+    <div class="recipe-empty" id="recipeEmpty">Tap below<br>and let us decide</div>
+    <div class="recipe-result" id="recipeResult" style="display:none">
+      <div class="recipe-name" id="recipeName"></div>
+      <div class="recipe-meta" id="recipeMeta"></div>
+      <button class="recipe-details-btn" id="detailsBtn">See Recipe</button>
+    </div>
+  </div>
+
+  <div class="spinner-area">
+    <div class="plate" id="plate">
+      <div class="garnish g1"></div>
+      <div class="garnish g2"></div>
+    </div>
+  </div>
+
+  <button class="btn-primary" id="spinBtn">Surprise Me</button>
+
+  <div class="nav-row">
+    <button class="btn-secondary" id="recipesBtn">All Recipes</button>
+    <button class="btn-secondary alt" id="settingsBtn">Settings</button>
+  </div>
+
+  <div class="footer-attr">
+    Recipes curated locally and from <a href="https://www.themealdb.com">TheMealDB</a>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-content" id="modalContent"></div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let currentRecipe = null;
+let isSpinning = false;
+
+const MEALS = [
+  {key:"all", label:"All"},
+  {key:"dinner", label:"Dinner"},
+  {key:"dessert", label:"Dessert"},
+  {key:"breakfast", label:"Breakfast"},
+  {key:"soup", label:"Soup"},
+  {key:"salad", label:"Salad"},
+  {key:"appetizer", label:"Appetizer"},
+];
+
+const PROTEINS = [
+  {key:"any", label:"Any"},
+  {key:"chicken", label:"Chicken"},
+  {key:"beef", label:"Beef"},
+  {key:"pork", label:"Pork"},
+  {key:"seafood", label:"Seafood"},
+  {key:"lamb", label:"Lamb"},
+  {key:"vegetarian", label:"Vegetarian"},
+];
+
+const state = {
+  meal: "all",
+  protein: "any",
+  no_peanuts: false,
+  premium: false,
+};
+
+function buildChips() {
+  $("mealRow").innerHTML = MEALS.map(m =>
+    `<button class="chip${m.key===state.meal?' active':''}" data-meal="${m.key}">${m.label}</button>`
+  ).join("");
+  $("proteinRow").innerHTML = PROTEINS.map(p =>
+    `<button class="chip sage${p.key===state.protein?' active':''}" data-protein="${p.key}">${p.label}</button>`
+  ).join("");
+
+  $("mealRow").querySelectorAll("[data-meal]").forEach(b =>
+    b.addEventListener("click", () => {
+      state.meal = b.dataset.meal;
+      buildChips();
+    })
+  );
+  $("proteinRow").querySelectorAll("[data-protein]").forEach(b =>
+    b.addEventListener("click", () => {
+      state.protein = b.dataset.protein;
+      buildChips();
+    })
+  );
+}
+
+function filterQuery() {
+  const p = new URLSearchParams();
+  if (state.meal !== "all") p.set("meal_type", state.meal);
+  if (state.protein !== "any") p.set("protein", state.protein);
+  if (state.no_peanuts) p.set("no_peanuts", "true");
+  p.set("tier", state.premium ? "paid" : "free");
+  return "?" + p.toString();
+}
+
+async function spin() {
+  if (isSpinning) return;
+  isSpinning = true;
+  $("spinBtn").disabled = true;
+  $("recipeResult").style.display = "none";
+  $("recipeEmpty").style.display = "none";
+  $("recipeCard").classList.add("spinning");
+  $("plate").classList.add("active");
+
+  try {
+    const res = await fetch("/api/spin" + filterQuery());
+    if (!res.ok) {
+      $("plate").classList.remove("active");
+      $("recipeCard").classList.remove("spinning");
+      $("recipeEmpty").innerHTML = "No recipes match<br>those filters";
+      $("recipeEmpty").style.display = "block";
+      isSpinning = false;
+      $("spinBtn").disabled = false;
+      return;
+    }
+    const recipe = await res.json();
+    currentRecipe = recipe;
+
+    setTimeout(() => {
+      $("plate").classList.remove("active");
+      $("recipeCard").classList.remove("spinning");
+      showRecipe(recipe);
+      isSpinning = false;
+      $("spinBtn").disabled = false;
+    }, 1500);
+  } catch (e) {
+    console.error(e);
+    isSpinning = false;
+    $("spinBtn").disabled = false;
+    $("plate").classList.remove("active");
+    $("recipeCard").classList.remove("spinning");
+    $("recipeEmpty").style.display = "block";
+  }
+}
+
+function showRecipe(r) {
+  $("recipeName").textContent = r.name;
+  const meta = [
+    r.category,
+    `${r.time} min`,
+    `Serves ${r.servings}`,
+  ];
+  if (r.premium) meta.push("PRO");
+  $("recipeMeta").innerHTML = meta.map(m => `<span>${m}</span>`).join("");
+  $("recipeEmpty").style.display = "none";
+  $("recipeResult").style.display = "block";
+  $("recipeResult").style.animation = "none";
+  void $("recipeResult").offsetWidth;
+  $("recipeResult").style.animation = "pop .5s cubic-bezier(.34,1.56,.64,1)";
+}
+
+function openModal(html) {
+  $("modalContent").innerHTML = html;
+  $("modal").classList.add("active");
+}
+function closeModal() { $("modal").classList.remove("active"); }
+
+function showDetails(r) {
+  openModal(`
+    <h2>${r.name}${r.premium ? '<span class="premium-badge">PRO</span>' : ""}</h2>
+    <div class="meta-row">
+      <span>${r.category}</span>
+      <span>${r.time} min</span>
+      <span>Serves ${r.servings}</span>
+      ${r.protein ? `<span>${r.protein}</span>` : ""}
+    </div>
+    <h3>Ingredients</h3>
+    <ul>${r.ingredients.map(i => `<li>${i}</li>`).join("")}</ul>
+    <h3>Steps</h3>
+    <ol>${r.steps.map(s => `<li>${s}</li>`).join("")}</ol>
+    <button class="modal-close" onclick="closeModal()">Close</button>
+  `);
+}
+
+async function showAllRecipes() {
+  const res = await fetch("/api/recipes" + filterQuery());
+  const data = await res.json();
+  openModal(`
+    <h2>All Recipes</h2>
+    <p style="color:var(--text-muted);margin-bottom:16px;">${data.count} of ${data.total} recipes</p>
+    <ul style="list-style:none;padding:0;">
+      ${data.recipes.map(r => `
+        <li style="padding:11px 0;border-bottom:1px solid var(--surface-alt);display:flex;justify-content:space-between;align-items:center;gap:8px;">
+          <span style="font-weight:600;">${r.name}${r.premium ? '<span class="premium-badge">PRO</span>' : ""}</span>
+          <span style="color:var(--text-light);font-size:12px;flex-shrink:0;">${r.time} min</span>
+        </li>
+      `).join("")}
+    </ul>
+    <button class="modal-close" onclick="closeModal()">Close</button>
+  `);
+}
+
+$("nutBtn").addEventListener("click", () => {
+  state.no_peanuts = !state.no_peanuts;
+  $("nutBtn").classList.toggle("active", state.no_peanuts);
+});
+$("premBtn").addEventListener("click", () => {
+  state.premium = !state.premium;
+  $("premBtn").classList.toggle("active", state.premium);
+});
+$("spinBtn").addEventListener("click", spin);
+$("detailsBtn").addEventListener("click", () => currentRecipe && showDetails(currentRecipe));
+$("recipesBtn").addEventListener("click", showAllRecipes);
+$("settingsBtn").addEventListener("click", () => {
+  openModal(`
+    <h2>Settings</h2>
+    <p style="color:var(--text-muted);margin-bottom:20px;">Coming soon</p>
+    <button class="modal-close" onclick="closeModal()">Close</button>
+  `);
+});
+$("modal").addEventListener("click", e => { if (e.target === $("modal")) closeModal(); });
+
+buildChips();
+</script>
+</body>
+</html>

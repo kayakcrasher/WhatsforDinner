@@ -1,3 +1,5 @@
+"""Spinning plate animation."""
+
 from kivy.properties import NumericProperty
 from kivy.uix.widget import Widget
 

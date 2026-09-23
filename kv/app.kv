@@ -1,0 +1,241 @@
+#:import Rotate kivy.graphics.Rotate
+#:import PushMatrix kivy.graphics.PushMatrix
+#:import PopMatrix kivy.graphics.PopMatrix
+#:import theme src.utils.theme
+
+# ---------- RoundedButton ----------
+<RoundedButton>:
+    background_normal: ""
+    background_down: ""
+    background_color: 0, 0, 0, 0
+    color: theme.WHITE
+    font_name: theme.FONT_FAMILY
+    font_size: theme.FONT_BODY
+    bold: True
+    canvas.before:
+        Color:
+            rgba: 0.20, 0.16, 0.16, self.shadow_alpha
+        RoundedRectangle:
+            pos: self.x, self.y - dp(2)
+            size: self.width, self.height
+            radius: [self.radius]
+        Color:
+            rgba: self.bg_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [self.radius]
+
+# ---------- Card ----------
+<Card>:
+    padding: dp(theme.CARD_PAD)
+    canvas.before:
+        Color:
+            rgba: 0.20, 0.16, 0.16, self.shadow_alpha
+        RoundedRectangle:
+            pos: self.x, self.y - dp(3)
+            size: self.width, self.height
+            radius: [self.radius]
+        Color:
+            rgba: self.bg_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [self.radius]
+
+# ---------- SpinnerWidget ----------
+<SpinnerWidget>:
+    angle: 0
+    canvas:
+        PushMatrix
+        Rotate:
+            angle: self.angle
+            origin: self.center
+        Color:
+            rgba: 1, 1, 1, 1
+        Ellipse:
+            pos: self.pos
+            size: self.size
+        Color:
+            rgba: theme.PRIMARY_LIGHT
+        Line:
+            circle: self.center_x, self.center_y, self.width * 0.44
+            width: dp(2)
+        Color:
+            rgba: theme.PRIMARY
+        Ellipse:
+            pos: self.x + self.width * 0.18, self.y + self.height * 0.18
+            size: self.width * 0.64, self.height * 0.64
+        Color:
+            rgba: theme.SAGE
+        Ellipse:
+            pos: self.x + self.width * 0.28, self.y + self.height * 0.55
+            size: self.width * 0.14, self.height * 0.14
+        Color:
+            rgba: theme.TERRACOTTA
+        Ellipse:
+            pos: self.x + self.width * 0.58, self.y + self.height * 0.30
+            size: self.width * 0.12, self.height * 0.12
+        Color:
+            rgba: theme.GOLD
+        Ellipse:
+            pos: self.x + self.width * 0.50, self.y + self.height * 0.62
+            size: self.width * 0.10, self.height * 0.10
+        PopMatrix
+
+# ---------- HomeScreen ----------
+<HomeScreen>:
+    canvas.before:
+        Color:
+            rgba: theme.BG
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(theme.SPACE_LG), dp(theme.SPACE_XL), dp(theme.SPACE_LG), dp(theme.SPACE_LG)
+        spacing: dp(theme.SPACE_MD)
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(56)
+            orientation: "vertical"
+            Label:
+                text: "What's for Dinner?"
+                font_name: theme.FONT_FAMILY
+                font_size: theme.FONT_TITLE
+                bold: True
+                color: theme.TEXT
+                halign: "center"
+                valign: "middle"
+                text_size: self.width, None
+            Label:
+                text: "Let us decide for you"
+                font_name: theme.FONT_FAMILY
+                font_size: theme.FONT_SMALL
+                color: theme.TEXT_MUTED
+                halign: "center"
+                valign: "top"
+                text_size: self.width, None
+
+        Card:
+            size_hint_y: 0.4
+            orientation: "vertical"
+            Label:
+                id: recipe_label
+                text: root.current_recipe if root.current_recipe else "Tap below\nand let us decide"
+                font_name: theme.FONT_FAMILY
+                font_size: theme.FONT_HEADING
+                bold: bool(root.current_recipe)
+                color: theme.TEXT if root.current_recipe else theme.TEXT_LIGHT
+                halign: "center"
+                valign: "middle"
+                text_size: self.width, None
+
+        BoxLayout:
+            size_hint_y: 0.32
+            SpinnerWidget:
+                id: spinner
+                size_hint: None, None
+                size: dp(160), dp(160)
+                pos_hint: {"center_x": 0.5, "center_y": 0.5}
+                opacity: 0
+
+        RoundedButton:
+            text: "Surprise Me"
+            font_size: theme.FONT_HEADING
+            size_hint_y: None
+            height: dp(theme.BTN_HEIGHT_LG)
+            bg_color: theme.PRIMARY
+            bg_color_pressed: theme.PRIMARY_DARK
+            disabled: root.is_spinning
+            on_release: root.spin()
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(theme.BTN_HEIGHT_MD)
+            spacing: dp(theme.SPACE_SM)
+            RoundedButton:
+                text: "My Recipes"
+                bg_color: theme.SAGE
+                bg_color_pressed: theme.SAGE_DARK
+                radius: theme.RADIUS_MD
+                font_size: theme.FONT_SMALL
+                on_release: app.root.current = "recipe"
+            RoundedButton:
+                text: "Settings"
+                bg_color: theme.SURFACE_ALT
+                bg_color_pressed: theme.PRIMARY_LIGHT
+                color: theme.TEXT
+                radius: theme.RADIUS_MD
+                font_size: theme.FONT_SMALL
+                on_release: app.root.current = "settings"
+
+# ---------- RecipeScreen ----------
+<RecipeScreen>:
+    canvas.before:
+        Color:
+            rgba: theme.BG
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(theme.SPACE_LG)
+        spacing: dp(theme.SPACE_MD)
+        Label:
+            text: "My Recipes"
+            font_name: theme.FONT_FAMILY
+            font_size: theme.FONT_TITLE
+            bold: True
+            color: theme.TEXT
+            size_hint_y: None
+            height: dp(48)
+        Label:
+            text: "Coming soon"
+            font_name: theme.FONT_FAMILY
+            color: theme.TEXT_MUTED
+        RoundedButton:
+            text: "Back"
+            size_hint_y: None
+            height: dp(theme.BTN_HEIGHT_MD)
+            bg_color: theme.SURFACE_ALT
+            bg_color_pressed: theme.PRIMARY_LIGHT
+            color: theme.TEXT
+            radius: theme.RADIUS_MD
+            on_release: app.root.current = "home"
+
+# ---------- SettingsScreen ----------
+<SettingsScreen>:
+    canvas.before:
+        Color:
+            rgba: theme.BG
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(theme.SPACE_LG)
+        spacing: dp(theme.SPACE_MD)
+        Label:
+            text: "Settings"
+            font_name: theme.FONT_FAMILY
+            font_size: theme.FONT_TITLE
+            bold: True
+            color: theme.TEXT
+            size_hint_y: None
+            height: dp(48)
+        Label:
+            text: "Coming soon"
+            font_name: theme.FONT_FAMILY
+            color: theme.TEXT_MUTED
+        RoundedButton:
+            text: "Back"
+            size_hint_y: None
+            height: dp(theme.BTN_HEIGHT_MD)
+            bg_color: theme.SURFACE_ALT
+            bg_color_pressed: theme.PRIMARY_LIGHT
+            color: theme.TEXT
+            radius: theme.RADIUS_MD
+            on_release: app.root.current = "home"
