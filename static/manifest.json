@@ -1,14 +1,22 @@
 {
+  "id": "/?source=pwa",
   "name": "What's for Dinner?",
   "short_name": "Dinner?",
   "description": "An app for people who can't decide what to eat.",
-  "start_url": "/",
+  "lang": "en-US",
+  "dir": "ltr",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#FAF4F0",
   "theme_color": "#E1A1A8",
-  "categories": ["food", "lifestyle"],
+  "categories": ["food", "lifestyle", "utilities"],
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": "auto"
+  },
   "icons": [
     {
       "src": "/static/icons/icon-192.png",
@@ -33,6 +41,41 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Spin for a recipe"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Surprise Me",
+      "short_name": "Spin",
+      "description": "Spin for a random recipe",
+      "url": "/?action=spin",
+      "icons": [
+        {
+          "src": "/static/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Favorites",
+      "short_name": "Faves",
+      "description": "View your saved recipes",
+      "url": "/?action=favorites",
+      "icons": [
+        {
+          "src": "/static/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }
