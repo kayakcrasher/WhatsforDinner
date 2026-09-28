@@ -8,6 +8,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#E1A1A8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Dinner?">
+<link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+
 <style>
   :root{
     --bg:#FAF4F0; --surface:#FFF; --surface-alt:#F5EDE6;
@@ -408,6 +415,15 @@ $("modal").addEventListener("click",e=>{if(e.target===$("modal"))closeModal();})
 saveFavs();
 buildChips();
 loadCuisines();
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/static/sw.js").catch((e) => {
+      console.warn("Service worker registration failed:", e);
+    });
+  });
+}
 </script>
 </body>
 </html>
