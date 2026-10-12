@@ -1,8 +1,10 @@
 /* Service worker for What's for Dinner? */
 
-const CACHE_VERSION = "wfd-v1";
+const CACHE_VERSION = "wfd-v2-slots";
 const APP_SHELL = [
   "/",
+  "/static/slots.css",
+  "/static/slots.js",
   "/static/manifest.json",
   "/static/icons/icon-192.png",
   "/static/icons/icon-512.png",

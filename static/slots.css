@@ -1,0 +1,28 @@
+:root{--bg:#100d23;--surface:#211a38;--surface-alt:#302544;--primary:#fc638d;--primary-dark:#ff8daa;--primary-light:#42243c;--sage:#6ae0c4;--sage-dark:#247c6c;--text:#fff6ef;--text-muted:#c9bbd9;--text-light:#a99aba;--gold:#ffc96b;--shadow-md:0 8px 30px #0005}
+html,body{overflow:auto;user-select:auto;background:radial-gradient(ellipse at 50% 0,#422044,transparent 65%),var(--bg)}
+#app{height:auto;min-height:100dvh;max-width:560px;padding-top:28px}
+header h1{font-size:28px}header p{color:var(--gold)}
+.chip.active{color:#190e22}.chip.active.sage{color:#102f29}
+.slot-machine{position:relative;margin:14px 0 0;padding:18px 45px 18px 14px;border:2px solid var(--gold);border-radius:26px;background:linear-gradient(150deg,#493057,#241830);box-shadow:0 0 28px #fc638d22,inset 0 0 0 5px #ffc96b12;flex-shrink:0}
+.marquee{text-align:center;color:var(--gold);font-weight:800;font-size:12px;letter-spacing:3px;margin-bottom:15px}
+.reels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.reel{height:150px;overflow:hidden;border:1px solid #ffffff30;border-radius:14px;background:linear-gradient(#fff4e8,#f0d9c4);position:relative;box-shadow:inset 0 5px 12px #46254433}
+.reel:after{content:'';position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 14px 12px #39213722,inset 0 -14px 12px #39213722}
+.reel-track{will-change:transform}
+.reel-tile{height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:8px;text-align:center;color:#32213b}
+.reel-icon{font-size:34px}.reel-title{font-size:12px;font-weight:800;line-height:1.25;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.reel-choice{display:block;width:100%;border:0;background:none;font:inherit;cursor:pointer}.reel-choice:disabled{cursor:default}
+.lever{position:absolute;right:4px;top:56px;width:38px;height:145px;background:none;border:0;cursor:grab;touch-action:pan-x}
+.lever:before{content:'';position:absolute;width:10px;height:94px;left:14px;top:28px;border-radius:8px;background:linear-gradient(90deg,#8f809b,#f9eefc,#8f809b);transform-origin:bottom;transition:transform .22s}
+.lever:after{content:'';position:absolute;left:3px;top:8px;width:32px;height:32px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#ffd4e0,#ff427b 60%,#a42158);box-shadow:0 0 16px #fc638d55;transition:transform .22s}
+.lever.pulled:before{transform:scaleY(.45)}.lever.pulled:after{transform:translateY(52px)}
+.lever:disabled{cursor:default}.slot-status{min-height:40px;margin-top:12px;text-align:center;color:var(--text-muted);font-size:12px;line-height:1.4}
+.slot-machine.jackpot{border-color:#6ae0c4;box-shadow:0 0 35px #6ae0c455}.jackpot .marquee{color:#6ae0c4}.jackpot .reel{outline:2px solid var(--gold)}
+.btn-primary{margin-top:12px;background:linear-gradient(110deg,#fc638d,#e44faf);box-shadow:0 5px 0 #8d285f,0 8px 25px #fc638d33;color:white}
+.recipe-card{margin-top:20px;min-height:130px}.recipe-empty{font-size:15px;color:var(--text-muted)}
+.btn-secondary,.btn-secondary.alt{background:var(--surface-alt);color:var(--text)}
+button:focus-visible{outline:3px solid var(--sage);outline-offset:4px}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:30}.confetti i{position:absolute;top:-20px;width:9px;height:15px;animation:confetti-fall 2.6s ease-in forwards}
+@keyframes confetti-fall{to{transform:translate3d(var(--drift),105vh,0) rotate(620deg);opacity:0}}
+@media(max-width:360px){.reel-title{font-size:11px}.reel-icon{font-size:28px}.slot-machine{padding-left:8px}.reels{gap:4px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.confetti{display:none}}

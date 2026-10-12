@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#FAF4F0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#100d23">
 <title>What's for Dinner?</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="manifest" href="/static/manifest.json">
-<meta name="theme-color" content="#E1A1A8">
+
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Dinner?">
@@ -60,16 +60,6 @@
   .heart-btn.active{opacity:1;transform:scale(1.15)}
   @keyframes pop{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}
 
-  .spinner-area{height:130px;display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0}
-  .plate{width:110px;height:110px;border-radius:50%;background:#fff;box-shadow:var(--shadow-md);position:absolute;opacity:0;transition:opacity .3s ease}
-  .plate.active{opacity:1;animation:spin 1s linear infinite}
-  .plate::before{content:'';position:absolute;top:15%;left:15%;width:70%;height:70%;border-radius:50%;background:var(--primary)}
-  .plate::after{content:'';position:absolute;top:40%;left:40%;width:20%;height:20%;border-radius:50%;background:var(--terracotta)}
-  .plate .garnish{position:absolute;border-radius:50%}
-  .plate .g1{width:14%;height:14%;background:var(--sage);top:55%;left:28%}
-  .plate .g2{width:12%;height:12%;background:var(--gold);top:30%;left:60%}
-  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-
   .btn-primary{background:var(--primary);color:#fff;border:none;font-family:inherit;font-size:18px;font-weight:800;padding:15px;border-radius:var(--radius-pill);cursor:pointer;box-shadow:var(--shadow-md);transition:all .15s ease;margin-bottom:10px;letter-spacing:-.3px;flex-shrink:0}
   .btn-primary:active:not(:disabled){background:var(--primary-dark);transform:scale(.98)}
   .btn-primary:disabled{opacity:.7;cursor:not-allowed}
@@ -102,13 +92,14 @@
   .recipe-row-time{color:var(--text-light);font-size:12px;flex-shrink:0}
   .empty-state{text-align:center;padding:40px 20px;color:var(--text-light);font-size:14px;line-height:1.6}
 </style>
+<link rel="stylesheet" href="/static/slots.css">
 </head>
 <body>
 
 <div id="app">
   <header>
     <h1>What's for Dinner?</h1>
-    <p>Let us decide for you</p>
+    <p>Big flavor. One little lever.</p>
     <button class="fav-count" id="favBtn">♥ <span id="favCount">0</span></button>
   </header>
 
@@ -135,9 +126,19 @@
     </div>
   </div>
 
+  <section class="slot-machine" id="slotMachine" aria-label="Three recipe slot machine">
+    <div class="marquee" id="marquee">WINNER WINNER · DINNER DINNER</div>
+    <div class="reels" id="reels">
+      <div class="reel"><div class="reel-track"></div></div>
+      <div class="reel"><div class="reel-track"></div></div>
+      <div class="reel"><div class="reel-track"></div></div>
+    </div>
+    <button class="lever" id="lever" aria-label="Pull the lever to pick three recipes"></button>
+    <p class="slot-status" id="slotStatus" role="status" aria-live="polite">Pull for three ideas. Three identical recipes? Dinner jackpot!</p>
+  </section>
   <div class="recipe-card" id="recipeCard">
     <button class="heart-btn" id="heartBtn" style="display:none">♥</button>
-    <div class="recipe-empty" id="recipeEmpty">Tap below<br>and let us decide</div>
+    <div class="recipe-empty" id="recipeEmpty">Your next favorite meal is one pull away.</div>
     <div class="recipe-result" id="recipeResult" style="display:none">
       <div class="recipe-name" id="recipeName"></div>
       <div class="recipe-meta" id="recipeMeta"></div>
@@ -148,15 +149,7 @@
     </div>
   </div>
 
-  <div class="spinner-area">
-    <div class="plate" id="plate">
-      <div class="garnish g1"></div>
-      <div class="garnish g2"></div>
-    </div>
-  </div>
-
-  <button class="btn-primary" id="spinBtn">Surprise Me</button>
-
+  <button class="btn-primary" id="spinBtn">Pull for dinner</button>
   <div class="nav-row">
     <button class="btn-secondary" id="recipesBtn">All Recipes</button>
     <button class="btn-secondary alt" id="settingsBtn">Settings</button>
@@ -238,42 +231,6 @@ function filterQuery(){
   return "?"+p.toString();
 }
 
-async function spin(){
-  if(isSpinning)return;
-  isSpinning=true;
-  $("spinBtn").disabled=true;
-  $("recipeResult").style.display="none";
-  $("recipeEmpty").style.display="none";
-  $("heartBtn").style.display="none";
-  $("recipeCard").classList.add("spinning");
-  $("plate").classList.add("active");
-
-  try{
-    const res = await fetch("/api/spin"+filterQuery());
-    if(!res.ok){
-      $("plate").classList.remove("active");
-      $("recipeCard").classList.remove("spinning");
-      $("recipeEmpty").innerHTML="No recipes match<br>those filters";
-      $("recipeEmpty").style.display="block";
-      isSpinning=false;$("spinBtn").disabled=false;
-      return;
-    }
-    const recipe = await res.json();
-    currentRecipe = recipe;
-    setTimeout(()=>{
-      $("plate").classList.remove("active");
-      $("recipeCard").classList.remove("spinning");
-      showRecipe(recipe);
-      isSpinning=false;$("spinBtn").disabled=false;
-    },1500);
-  }catch(e){
-    console.error(e);
-    isSpinning=false;$("spinBtn").disabled=false;
-    $("plate").classList.remove("active");
-    $("recipeCard").classList.remove("spinning");
-    $("recipeEmpty").style.display="block";
-  }
-}
 
 function showRecipe(r){
   $("recipeName").textContent = r.name;
@@ -390,7 +347,7 @@ $("premBtn").addEventListener("click",async()=>{
   $("premBtn").classList.toggle("active",state.premium);
   await loadCuisines();
 });
-$("spinBtn").addEventListener("click",spin);
+
 $("detailsBtn").addEventListener("click",()=>currentRecipe&&showDetails(currentRecipe));
 $("shareBtn").addEventListener("click",()=>currentRecipe&&shareRecipe(currentRecipe));
 $("heartBtn").addEventListener("click",()=>{
@@ -405,9 +362,16 @@ $("favBtn").addEventListener("click",showFavorites);
 $("settingsBtn").addEventListener("click",()=>{
   openModal(`
     <h2>Settings</h2>
-    <p style="color:var(--text-muted);margin-bottom:20px;">Coming soon</p>
+    <p style="color:var(--text-muted);margin-bottom:20px;">Spins are always optional. Choose any of the three recipes when you are ready to cook.</p>
+    <label><input type="checkbox" id="soundSetting" ${slotSound?'checked':''}> Play celebration sound</label>
     <button class="modal-close" onclick="closeModal()">Close</button>
   `);
+});
+$("modalContent").addEventListener("change",e=>{
+  if(e.target.id==="soundSetting"){
+    slotSound=e.target.checked;
+    localStorage.setItem("wfd_sound",String(slotSound));
+  }
 });
 $("modal").addEventListener("click",e=>{if(e.target===$("modal"))closeModal();});
 
@@ -416,6 +380,7 @@ saveFavs();
 buildChips();
 loadCuisines();
 </script>
+<script src="/static/slots.js"></script>
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
